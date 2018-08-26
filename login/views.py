@@ -6,7 +6,7 @@ from django.shortcuts import  render
 from django.shortcuts import redirect
 
 def index(request):
-    return render(request,'login/index.html')
+    return render(request,'login/login.html')
 def welcome(request):
     email = request.POST.get("email")
     password = request.POST.get('password')
