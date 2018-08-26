@@ -7,11 +7,15 @@ from django.shortcuts import redirect
 
 def index(request):
     return render(request,'login/index.html')
-def validateuser(request):
+def welcome(request):
     email = request.POST.get("email")
-    print(email)
     password = request.POST.get('password')
-    print(password)
-    if password !='123':
-        return redirect('%s?next=%s' % ('index', 'login/validateuser'))
-    return HttpResponse("Hello,you login in to this site!")
+    if not validate(password):
+        return redirect('%s?next=%s' % ('index', 'login/welcome'))
+    #return HttpResponse("Hello,you login in to this site!")
+    return render(request, 'index.html')
+def validate(user):
+    if user !='123':
+        return False
+    else:
+        return True
