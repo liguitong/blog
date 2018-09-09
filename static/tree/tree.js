@@ -7,9 +7,10 @@
     var ctx = null ;
     var treeNum = 3 ;
     var initRadius = 25 ;     // 树干的初始宽度
-    var maxGeneration = 5 ;   // 最多分支的次数
+    var maxGeneration = 6 ;   // 最多分支的次数
     var branchArray = null ;  // 树干的集合
     var flowers = [];         // 花的集合
+    var leaves = [];          // set of leaves
 
     window.MyRequestAnimationFrame = window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -107,6 +108,7 @@
         obj.speed = t.speed;
         obj.generation = t.generation;
         branchArray.add(obj);
+        console.log("branch radius is " + obj.radius)
     }
     /**
      * branch
@@ -117,7 +119,7 @@
     function Branch (x , y) {
         this.x = x ;
         this.y = y ;
-        this.radius = initRadius ;
+        //this.radius = initRadius ;
         this.angle = Math.PI / 2 ; // 树枝的初始角度
         this.speed = 2.35 ;    // 数生长的速度
         this.generation = 1 ;
@@ -132,7 +134,7 @@
     }
 
     Branch.prototype.draw = function () {
-        ctx.fillStyle = 'GREEN';
+        ctx.fillStyle = '#55220F';
         ctx.beginPath();
         ctx.arc(this.x , this.y , this.radius , 0 , 2 * Math.PI);
         ctx.fill();
@@ -217,6 +219,35 @@
         }
     }
 
+    function Leaf(x, y, r){
+        this.x = x;
+        this.y = y;
+        this.radius = 1;
+        this.maxRadius = r;
+        this.speed = 1.0235;
+
+    }
+    Leaf.prototype.update = function(index){
+        if(this.radius = this.maxRadius){
+            leaves.splice(index, 1);
+            return;
+        }
+        this.r *=this.speed;
+        if(this.radius> this.maxRadius){
+            this.radius = this.maxRadius;
+        }
+    }
+    Leaf.prototype.draw = function(){
+        ctx.fillStyle = "GREEN";
+        ctx.moveTo(this.x,this.y)
+        ctx.lineTo(this.x + this.radius/2,this.y-this.radius/2)
+        ctx.stroke()
+        ctx.beginPath();
+        ctx.arc(this.x+this.radius/2,this.y-this.radius*3/2,this.radius,0,Math.PI / 2);
+        ctx.arc(this.x+this.radius*3/2,this.y-this.radius/2, this.radius,Math.PI ,Math.PI / 2 * 3)
+        ctx.fill();
+    }
+
     /**
      * 花
      * @param x
@@ -275,11 +306,17 @@
             var b = branchArray.branchs[i];
             b.grow();
         }
+        var lengthOfLeaves = leaves.length;
+        while (lengthOfLeaves --){
+            leaves[lengthOfLeaves].draw()
+            leaves[lengthOfLeaves].update();
+        }
         var len = flowers.length ;
         while (len --) {
             flowers[len].draw();
             flowers[len].update();
         }
+
         MyRequestAnimationFrame(loop);
     }
 
