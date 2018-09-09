@@ -40,13 +40,76 @@
      */
     function initTree () {
         branchArray = new BranchArray ();
-        for(var i = 0 ; i < treeNum ; i++) {
-            branchArray.add(new Branch(w / 2 , h));
-        }
+        branchArray.add(new Trunk(w / 2, h))
+        //for(var i = 0 ; i < treeNum ; i++) {
+        //    branchArray.add(new Branch(w / 2 , h));
+        //}
     }
-
     /**
-     * 树干
+     * trunk
+     * @param x
+     * @param y
+     * @constructor
+     */
+    function Trunk (x , y) {
+        this.x = x ;
+        this.y = y ;
+        this.radius = initRadius ;
+        this.angle = Math.PI / 2 ; // 树枝的初始角度
+        this.speed = 2.35 ;    // 数生长的速度
+        this.generation = 1 ;
+    }
+    Trunk.prototype.grow = function () {
+        this.draw();
+        this.update();
+    }
+    Trunk.prototype.draw = function () {
+        ctx.fillStyle = "#55220F";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+      /**
+     * 更改数的高度以及扭曲度
+     */
+    Trunk.prototype.update = function () {
+
+
+        var vx = this.speed * Math.cos(this.angle);
+        // 因为初始角度设置为Math.PI , 所以vy要取负数
+        var vy = - this.speed * Math.sin(this.angle);
+
+        if(this.radius < 0.99 || this.generation > maxGeneration) {
+            branchArray.remove(this);
+        }
+
+        this.x += vx ;
+        this.y += vy ;
+
+        this.radius *= 0.99 ;
+        if(this.radius >= 0.9) {
+            // 计算当前是第几代分支
+            var g = (maxGeneration - 1) * initRadius / (initRadius - 1) / this.radius + (initRadius - maxGeneration) / (initRadius - 1) ;
+            if( g > this.generation + 1) {
+                this.generation = Math.floor(g) ;
+                // 随机创建分支
+                for(var i = 0 ; i < random(1,3) ; i++) {
+                    this.branch(this);
+                }
+            }
+        }
+
+    }
+    Trunk.prototype.branch = function (t) {
+        var obj = new Branch(t.x , t.y);
+        obj.angle = t.angle ;
+        obj.radius = t.radius ;
+        obj.speed = t.speed;
+        obj.generation = t.generation;
+        branchArray.add(obj);
+    }
+    /**
+     * branch
      * @param x
      * @param y
      * @constructor
@@ -69,7 +132,7 @@
     }
 
     Branch.prototype.draw = function () {
-        ctx.fillStyle = '#55220F';
+        ctx.fillStyle = 'GREEN';
         ctx.beginPath();
         ctx.arc(this.x , this.y , this.radius , 0 , 2 * Math.PI);
         ctx.fill();
@@ -81,7 +144,8 @@
     Branch.prototype.update = function () {
 
         // 计算树干每次的扭曲角度，因为树一般不是笔直生长的，都会有不规则的扭曲
-        this.angle += random( -0.1 * this.generation / 2 , 0.1 * this.generation / 2 );
+        if(this.generation > 1)
+            this.angle += random( -0.1 * this.generation / 2 , 0.1 * this.generation / 2 );
 
         var vx = this.speed * Math.cos(this.angle);
         // 因为初始角度设置为Math.PI , 所以vy要取负数
